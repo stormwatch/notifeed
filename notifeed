@@ -1,0 +1,105 @@
+#!/usr/bin/python
+# coding=utf-8
+
+#    Adapted on jue jul 19 15:05:27 ART 2012 by Ezequiel Birman from
+#    the original script by Daniel Süpke at http://suepke.net/?p=443
+
+#    Copyright 2012 by Ezequiel Birman
+#
+#    This program is free software: you can redistribute it and/or modify
+#    it under the terms of the GNU General Public License as published by
+#    the Free Software Foundation, either version 3 of the License, or
+#    (at your option) any later version.
+#
+#    This program is distributed in the hope that it will be useful,
+#    but WITHOUT ANY WARRANTY; without even the implied warranty of
+#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#    GNU General Public License for more details.
+#
+#    You should have received a copy of the GNU General Public License
+#    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+#
+# notifeed v0.1
+#
+
+import pynotify
+import feedparser
+import time
+import os.path
+import sys
+
+config_file = os.path.expanduser('~/.notifeed')
+feeds = []
+titles = []
+
+try:
+    file = open(config_file, 'r')
+except:
+    file = open(config_file, 'w')
+    file.write('# amount of seconds to wait before checking for new items\n')
+    file.write('interval 600\n\n')
+    file.write('# seconds to wait between notificatons')
+    file.write('silence 10\n\n')
+    file.write('# feeds to check\n')
+    file.write('feed http://suepke.eu/feed/\n')
+    file.write('feed http://rss.golem.de/rss.php?feed\x3dRSS1.0\x26ms\x3drss\n')
+
+
+    print('Config file not found! Created example file at ' + config_file + '. Please edit.')
+    sys.exit(0)
+
+
+for line in file.readlines():
+    config_line = line.rstrip().partition('#')[0] # Remove \n and comments
+
+    if config_line.startswith('feed '):
+        feeds.append(config_line.partition('feed ')[2])
+    if config_line.startswith('interval '):
+        interval = int(config_line.partition('interval ')[2])
+    if config_line.startswith('silence '):
+        silence = int(config_line.partition('silence ')[2])
+
+    titles.append('')
+
+
+file.close()
+
+if not feeds:
+    print('There were no feeds in your config file at ' + config_file + '. Exiting...')
+    sys.exit(0)
+
+if not interval:
+    print('No check interval has been defined. Assuming ten minutes.')
+    interval = 600
+
+if not silence:
+    print('No silence interval has been defined. Assuming ten seconds.')
+    silence = 10
+
+if not pynotify.init("rssnotify"):
+    sys.exit(1)
+
+# Check for new feeds every interval seconds
+while True:
+    print('while true:')
+    for feed in feeds:
+        d = feedparser.parse(feed)
+        for _, item in enumerate(d['entries']):
+            protocol, _, link = item.link.partition('://')
+            n = pynotify.Notification(item.source.title,
+                                      '<a href="' +
+                                      protocol + '://' +
+                                      # auth +
+                                      link.replace('&','&amp;') + '">' +
+                                      item.title.replace('&','&amp;') + '</a>')
+
+            if not n.show():
+                print('Failed to send notification')
+                sys.exit(1)
+
+            time.sleep(silence)
+
+            if not n.close():
+                print('Failed to close notification')
+                sys.exit(1)
