@@ -1,8 +1,20 @@
 notifeed
 ========
 
+An atom/rss reader using libnotify.
+
 Adapted on jue jul 19 15:05:27 ART 2012 by Ezequiel Birman from the
 original script by Daniel Süpke at http://suepke.net/?p=443
+
+Tested with gnome's notification-deamon only.
+
+TODO:
+
+- authentication
+- sound
+- regex/glob highlighting
+- permanent notifications
+- hooks/automatic action triggering
 
 Copyright 2012 by Ezequiel Birman
 
@@ -18,5 +30,3 @@ General Public License for more details.
 
 You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
-
-notifeed
