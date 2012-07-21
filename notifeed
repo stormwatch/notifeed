@@ -85,12 +85,13 @@ while True:
         d = feedparser.parse(feed)
         for _, item in enumerate(d['entries']):
             protocol, _, link = item.link.partition('://')
-            n = pynotify.Notification(item.source.title,
-                                      '<a href="' +
-                                      protocol + '://' +
-                                      # auth +
-                                      link.replace('&','&amp;') + '">' +
-                                      item.title.replace('&','&amp;') + '</a>')
+            n = pynotify.Notification(
+            item.source.title if item.has_key('source') else d.channel.title,
+            '<a href="' +
+            protocol + '://' +
+            # auth +
+            link.replace('&','&amp;') + '">' +
+            item.title.replace('&','&amp;') + '</a>')
 
             if not n.show():
                 print('Failed to send notification')
