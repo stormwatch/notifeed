@@ -16,7 +16,7 @@ TODO:
 - permanent notifications
 - hooks/automatic action triggering
 
-Copyright 2012 by Daniel Süpke
+Copyright 2010 by Daniel Süpke
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
