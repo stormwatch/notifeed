@@ -82,7 +82,6 @@ if not pynotify.init("rssnotify"):
 
 # Check for new feeds every interval seconds
 while True:
-    print('while true:')
     for feed in feeds:
         d = feedparser.parse(feed)
         for _, item in enumerate(d['entries']):
