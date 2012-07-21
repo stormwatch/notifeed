@@ -38,9 +38,9 @@ try:
 except:
     file = open(config_file, 'w')
     file.write('# amount of seconds to wait before checking for new items\n')
-    file.write('interval 600\n\n')
+    file.write('waitfeed 0\n\n')
     file.write('# seconds to wait between notificatons')
-    file.write('silence 10\n\n')
+    file.write('waitnotification 10\n\n')
     file.write('# feeds to check\n')
     file.write('feed http://suepke.eu/feed/\n')
     file.write('feed http://rss.golem.de/rss.php?feed\x3dRSS1.0\x26ms\x3drss\n')
@@ -55,10 +55,10 @@ for line in file.readlines():
 
     if config_line.startswith('feed '):
         feeds.append(config_line.partition('feed ')[2])
-    if config_line.startswith('interval '):
-        interval = int(config_line.partition('interval ')[2])
-    if config_line.startswith('silence '):
-        silence = int(config_line.partition('silence ')[2])
+    if config_line.startswith('waitfeed '):
+        waitfeed = int(config_line.partition('waitfeed ')[2])
+    if config_line.startswith('waitnotification '):
+        waitnotification = int(config_line.partition('waitnotification ')[2])
 
     titles.append('')
 
@@ -69,18 +69,17 @@ if not feeds:
     print('There were no feeds in your config file at ' + config_file + '. Exiting...')
     sys.exit(0)
 
-if not interval:
-    print('No check interval has been defined. Assuming ten minutes.')
-    interval = 600
+if not waitfeed:
+    print('No check interval has been defined. Assuming none.')
+    waitfeed = 0
 
-if not silence:
-    print('No silence interval has been defined. Assuming ten seconds.')
-    silence = 10
+if not waitnotification:
+    print('No notification interval has been defined. Assuming ten seconds.')
+    waitnotification = 10
 
 if not pynotify.init("rssnotify"):
     sys.exit(1)
 
-# Check for new feeds every interval seconds
 while True:
     for feed in feeds:
         d = feedparser.parse(feed)
@@ -97,8 +96,10 @@ while True:
                 print('Failed to send notification')
                 sys.exit(1)
 
-            time.sleep(silence)
+            time.sleep(waitnotification)
 
             if not n.close():
                 print('Failed to close notification')
                 sys.exit(1)
+
+    time.sleep(waitfeed)
